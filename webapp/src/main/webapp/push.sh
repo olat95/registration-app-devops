@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 short_hash=$(git rev-parse --short HEAD)

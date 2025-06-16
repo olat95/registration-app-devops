@@ -194,19 +194,14 @@ sudo cat /var/lib/jenkins/secrets/initialAdminPassword
 
 #### 📸 Screenshots
 
-**Git Repository Configuration**
+1. **Git Repository Configuration in Jenkins**  
+   ![Git Repository Configuration](assets/jenkins-git-config.png)
 
-![Git SCM](../mnt/data/991d08b4-4a5d-4824-92eb-b8f50d3e7671.png)
+2. **Build Step with Maven Target**  
+   ![Maven Build Configuration](assets/jenkins-maven-build.png)
 
-**Build Step with Maven**
-
-![Maven Build](../mnt/data/18951c9e-3c19-4a18-9a11-4d60a75f262a.png)
-
-**Successful Build History**
-
-![Build Success](../mnt/data/ecdf0ade-fdf1-4577-a7db-e1a9054464d3.png)
-
----
+3. **Successful Jenkins Build**  
+   ![Jenkins Build Success](assets/jenkins-build-success.png)
 
 ---
 

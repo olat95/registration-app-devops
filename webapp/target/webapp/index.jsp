@@ -1,12 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>DevOps Registration</title>
-  <link rel="stylesheet" type="text/css" href="style.css">
-</head>
-<body>
-
 <form action="action_page.php">
   <div class="container">
     <h1>New user Register for DevOps Learning at Virtual TechBox Youtube Channel 2025</h1>
@@ -18,7 +9,7 @@
     <br>
     
     <label for="mobile"><b>Enter mobile</b></label>
-    <input type="text" placeholder="Enter mobile number" name="mobile" id="mobile" required>
+    <input type="text" placeholder="Enter moible number" name="mobile" id="mobile" required>
     <br>
 
     <label for="email"><b>Enter Email</b></label>
@@ -36,17 +27,12 @@
     <p>By creating an account you agree to our <a href="#">Terms & Privacy</a>.</p>
     <button type="submit" class="registerbtn">Register</button>
   </div>
-  
   <div class="container signin">
     <p>Already have an account? <a href="#">Sign in</a>.</p>
   </div>
 
-  <div class="container thankyou">
-    <h1>Thank You, Happy Learning</h1>
-    <h1>See You Again</h1>
-    <h1>Pelumi</h1>
-  </div>
+   <h1> Thank You, Happy Learning </h1>
+   <h1> See You Again </h1>
+   <h1> Pelumi </h1>
+  
 </form>
-
-</body>
-</html>

@@ -11,7 +11,7 @@
   <h1 class="main-title">🚀 Register for DevOps Learning</h1>
   <h2 class="sub-title">Virtual TechBox YouTube Channel — 2025</h2>
 
-  <form action="action_page.php">
+  <form id="registerForm">
     <div class="form-container">
       <div class="form-column">
         <label for="Name"><b>Full Name</b></label>
@@ -46,6 +46,39 @@
     <h4>See You Again — Pelumi</h4>
   </footer>
 </div>
+
+<!-- Success Modal -->
+<div id="successModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" id="closeModal">&times;</span>
+    <h2>✅ Registration Successful!</h2>
+    <p>Welcome to my world, <span id="userName"></span> 👋</p>
+  </div>
+</div>
+
+<script>
+  const form = document.getElementById('registerForm');
+  const modal = document.getElementById('successModal');
+  const closeModal = document.getElementById('closeModal');
+  const userNameSpan = document.getElementById('userName');
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const name = document.getElementById('Name').value;
+    userNameSpan.textContent = name || "User";
+    modal.style.display = 'block';
+  });
+
+  closeModal.onclick = function() {
+    modal.style.display = 'none';
+  };
+
+  window.onclick = function(e) {
+    if (e.target == modal) {
+      modal.style.display = 'none';
+    }
+  };
+</script>
 
 </body>
 </html>

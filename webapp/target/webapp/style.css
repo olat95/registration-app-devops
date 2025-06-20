@@ -1,28 +1,28 @@
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(to right, #1f4037, #99f2c8);
+  background: linear-gradient(120deg, #f2f2f2, #e0f7fa);
   margin: 0;
   padding: 0;
-  animation: fadeInBody 1.2s ease-in;
-}
-
-@keyframes fadeInBody {
-  from { opacity: 0; }
-  to { opacity: 1; }
 }
 
 .wrapper {
   max-width: 900px;
   margin: 40px auto;
   padding: 20px;
-  background-color: #ffffffee;
+  background-color: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 1.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .main-title {
   text-align: center;
-  color: #004d40;
+  color: #00796b;
   margin-bottom: 0;
 }
 
@@ -59,14 +59,13 @@ input[type="password"] {
   width: 100%;
   padding: 10px;
   margin-bottom: 15px;
-  border: 1px solid #ccc;
+  border: 1px solid #bbb;
   border-radius: 5px;
-  transition: all 0.3s ease;
+  transition: border-color 0.3s ease;
 }
 
 input:focus {
   border-color: #26a69a;
-  box-shadow: 0 0 8px rgba(38, 166, 154, 0.3);
   outline: none;
 }
 
@@ -80,18 +79,19 @@ input:focus {
   border-radius: 6px;
   font-size: 16px;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: background-position 0.5s ease;
+  background-size: 200%;
+  background-position: left;
 }
 
 .registerbtn:hover {
-  transform: scale(1.03);
   background-position: right;
 }
 
 .terms {
   font-size: 13px;
   margin-top: 10px;
-  color: #666;
+  color: #777;
 }
 
 .signin-note {
@@ -103,49 +103,15 @@ input:focus {
 footer {
   text-align: center;
   margin-top: 40px;
-  color: #333;
+  color: #444;
 }
 
-/* Modal Styling */
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 999;
-  padding-top: 100px;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgba(0,0,0,0.4);
+footer h3 {
+  margin-bottom: 5px;
 }
 
-.modal-content {
-  background-color: #fff;
-  margin: auto;
-  padding: 30px;
-  border: 1px solid #888;
-  width: 50%;
-  max-width: 400px;
-  text-align: center;
-  border-radius: 12px;
-  animation: fadeInModal 0.5s ease;
-}
-
-@keyframes fadeInModal {
-  from { opacity: 0; transform: scale(0.9); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-.close-btn {
-  color: #aaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.close-btn:hover,
-.close-btn:focus {
-  color: #000;
+@media screen and (max-width: 600px) {
+  .form-container {
+    flex-direction: column;
+  }
 }

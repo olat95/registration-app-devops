@@ -223,3 +223,242 @@ sudo cat /var/lib/jenkins/secrets/initialAdminPassword
 ---
 
 > 🧠 **Week 1 Complete!** Stay tuned for the next project in this DevOps journey.
+
+# Week 2: CI/CD Deployment to Apache Tomcat via Jenkins (with SSH & Docker Setup)
+
+> **Project Goal:** Deploy a Java web application to a Tomcat staging server using Jenkins post-build automation over SSH. Set up Docker for future containerized deployments.
+
+---
+
+## 🛠️ Tools & Technologies
+
+- **Jenkins** – Automates CI/CD process
+- **Apache Tomcat** – Hosts Java web app in staging
+- **SSH** – Secure file transfer between VMs
+- **Docker** – Containerization setup
+- **Java 21**, **Ubuntu**, **Maven**, **Git**, **GitHub**
+
+---
+
+## 📈 Architecture Overview
+
+1. Developer pushes code to GitHub.
+2. Jenkins (on the workstation server) pulls the source code.
+3. Jenkins uses Maven to build the project and generate a `.war` file.
+4. Jenkins transfers the `.war` file via SSH to the Tomcat webapps directory on the staging server.
+5. Jenkins triggers Tomcat to deploy the application.
+
+---
+
+## 🔧 Setup & Configuration
+
+### 1. ✅ Create Two Ubuntu VMs
+
+We began by creating two separate Ubuntu VMs:
+
+- **Workstation VM**: For Jenkins, Git, Maven, and Java.
+- **Staging VM**: For Tomcat and Docker (future container hosting).
+
+This separation allows us to simulate a more realistic DevOps setup.
+
+---
+
+### 2. ☕ Installing Apache Tomcat on the Staging Server
+
+We logged into the staging VM and installed Java 21. Then, to prepare a runtime environment for our `.war` artifact, we installed Tomcat:
+
+```bash
+cd /opt
+sudo wget https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.42/bin/apache-tomcat-10.1.42.tar.gz
+sudo tar -xvf apache-tomcat-10.1.42.tar.gz
+sudo rm apache-tomcat-10.1.42.tar.gz
+sudo chown -R ubuntu:ubuntu apache-tomcat-10.1.42/
+```
+
+Next, we configured environment variables for Tomcat:
+
+```bash
+vi ~/.profile
+```
+
+Append:
+
+```bash
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+export CATALINA_HOME=/opt/apache-tomcat-10.1.42
+export CATALINA_BASE=/opt/apache-tomcat-10.1.42
+export PATH=${PATH}:${JAVA_HOME}/bin:${CATALINA_HOME}/bin:${CATALINA_BASE}/bin
+```
+
+Apply changes:
+
+```bash
+source ~/.profile
+```
+
+Then navigate into the `webapps` directory where our `.war` artifact will live:
+
+```bash
+cd /opt/apache-tomcat-10.1.42/webapps
+```
+
+---
+
+### 3. 🔐 Setting Up Passwordless SSH Between Servers
+
+We needed Jenkins on the workstation server to securely access the staging server via SSH. SSH is user-to-user, so we needed to set this up manually.
+
+On **Workstation VM** (as `jenkins`):
+
+```bash
+sudo passwd jenkins
+su jenkins
+cd ~
+mkdir -p .ssh && cd .ssh
+ssh-keygen -t rsa
+cat id_rsa.pub
+```
+
+On **Staging VM**:
+
+```bash
+cd ~/.ssh
+vi authorized_keys  # Paste the public key
+```
+
+Test connection:
+
+```bash
+ssh ubuntu@<staging-server-ip>
+```
+
+---
+
+### 4. ⚙️ Jenkins Configuration for SSH Transfer
+
+In Jenkins:
+
+- Navigate to **Manage Jenkins > Configure System > SSH Servers**
+- Add new SSH server:
+  - **Name:** Mo-staging
+  - **Hostname:** `<staging-server-ip>`
+  - **Username:** `ubuntu`
+  - **Remote Directory:** `.`
+  - **Path to private key:** `/var/lib/jenkins/.ssh/id_rsa`
+
+![Jenkins SSH Server Config](assets/jenkins-ssh-server-config.png)
+
+Test configuration → Save.
+
+In Jenkins:
+
+- Navigate to **Manage Jenkins > Configure System > SSH Servers**
+- Add new SSH server:
+  - **Name:** Mo-staging
+  - **Hostname:** `<staging-server-ip>`
+  - **Username:** `ubuntu`
+  - **Remote Directory:** `.`
+  - **Path to private key:** `/var/lib/jenkins/.ssh/id_rsa`
+
+Test configuration → Save.
+
+---
+
+### 5. 🚀 Jenkins Post-Build Artifact Transfer
+
+Inside Jenkins Job:
+
+- Go to **Configure > Post-build Actions > Send build artifacts over SSH**
+
+Settings:
+
+- **Source files:** `webapp/target/webapp.war`
+- **Remove prefix:** `webapp/target`
+- **Remote directory:** `.`
+- **Exec command:**
+
+```bash
+sudo cp ./webapp.war /opt/apache-tomcat-10.1.42/webapps
+```
+
+![Jenkins Post-Build Action](assets/jenkins-postbuild-artifact-transfer.png)
+
+Inside Jenkins Job:
+
+- Go to **Configure > Post-build Actions > Send build artifacts over SSH**
+
+Settings:
+
+- **Source files:** `webapp/target/webapp.war`
+- **Remove prefix:** `webapp/target`
+- **Remote directory:** `.`
+- \**Exec command:*sudo cp ./webapp.war /opt/apache-tomcat-10.1.42/webapps\*
+
+```bash
+sudo cp ./webapp.war /opt/apache-tomcat-10.1.42/webapps
+```
+
+---
+
+### 6. 🐳 Docker Installation on the Staging Server
+
+To prepare for future containerized deployments:
+
+```bash
+sudo apt install docker.io -y
+sudo usermod -aG docker ubuntu
+getent group | grep docker
+sudo init 6
+```
+
+After reboot:
+
+```bash
+docker ps
+```
+
+---
+
+### 7. 🧪 Final Pipeline Test & Troubleshooting
+
+![Jenkins Build Status](assets/jenkins-stable-vs-unstable-build.png)
+
+To test our setup:
+
+To test our setup:
+
+1. Remove any previously deployed artifacts:
+
+```bash
+rm /opt/apache-tomcat-10.1.42/webapps/webapp.war
+```
+
+2. Trigger build in Jenkins.
+3. Verify automatic deployment via Tomcat:
+
+![Tomcat Webapp Deployment](assets/tomcat-webapp-deployed.png)
+
+```bash
+http://<staging-ip>:8080/webapp/
+```
+
+During this step, I encountered a common blocker: the Jenkins build was marked "unstable" due to a failed SSH transfer. On troubleshooting, I realized port 22 was not open. Once I added the correct NSG rule to allow SSH on both VMs, the pipeline completed successfully.
+
+---
+
+## 🧠 Reflections & Learnings
+
+This project was both challenging and fulfilling. It involved many moving parts — and I hit roadblocks. The biggest lesson came from a failed build. In the past, I might’ve given up. But this time, I dug deeper. I discovered that Jenkins-to-staging SSH failed because port 22 wasn’t enabled. Once fixed, everything worked seamlessly.
+
+🔑 Key takeaways:
+
+- Jenkins post-build SSH is powerful when done right
+- Port 22 must be open for SSH transfers
+- Manual Tomcat deployment is foundational before Docker
+- Passwordless SSH setups are critical for automation
+- This time, I saw it through — and completed the project successfully
+
+---
+
+✅ **Week 2 Complete!**
+We now deploy `.war` files automatically to Tomcat from Jenkins. Docker is installed and ready for container-based deployments in Week 3!

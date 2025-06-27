@@ -620,7 +620,7 @@ docker build -t bliss-im .
 docker run -d --name bliss-con -p 8090:8080 bliss-im
 ```
 
-_💡 Suggestion:_ Add screenshot of Dockerfile code (e.g., `dockerfile-setup.png`).
+![A screenshot of Dockerfile code](assets/dockerfile-setup.png)
 
 ---
 
@@ -654,7 +654,7 @@ sudo docker build -t austin-im .
 sudo docker run -d --name austin-con -p 8088:8080 austin-im
 ```
 
-_💡 Suggestion:_ Add screenshot of Jenkins Exec Command section (e.g., `jenkins-postbuild-docker.png`).
+![A screenshot of Jenkins Exec Command section](assets/jenkins-postbuild-docker.png)
 
 ---
 

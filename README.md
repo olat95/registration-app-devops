@@ -544,7 +544,7 @@ sudo apt install net-tools -y
 sudo netstat -tnlp | grep :8080
 ```
 
-![A screenshot of running containers with `docker ps -a`](assets/docker-running-containers.png)
+![A screenshot of running containers with `docker ps -a`](assets/docker-running-container.png)
 
 ---
 

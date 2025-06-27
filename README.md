@@ -224,6 +224,8 @@ sudo cat /var/lib/jenkins/secrets/initialAdminPassword
 
 > 🧠 **Week 1 Complete!** Stay tuned for the next project in this DevOps journey.
 
+--======--
+
 # Week 2: CI/CD Deployment to Apache Tomcat via Jenkins (with SSH & Docker Setup)
 
 > **Project Goal:** Deploy a Java web application to a Tomcat staging server using Jenkins post-build automation over SSH. Set up Docker for future containerized deployments.
@@ -462,3 +464,214 @@ This project was both challenging and fulfilling. It involved many moving parts 
 
 ✅ **Week 2 Complete!**
 We now deploy `.war` files automatically to Tomcat from Jenkins. Docker is installed and ready for container-based deployments in Week 3!
+
+--======--
+
+# Week 3: Containerization & Dockerized Deployment via Jenkins
+
+> **Project Goal:** Package the Java web application into a Docker container and automate its deployment via Jenkins post-build actions. This step introduces containerization to make our deployments portable, lightweight, and environment-independent.
+
+---
+
+## 🛠️ Tools & Technologies
+
+- **Docker** – Containerization platform
+- **Jenkins** – Automates CI/CD process
+- **Tomcat (in container)** – Hosts Java web app
+- **Ubuntu**, **Java**, **Maven**, **Git**, **GitHub**
+
+---
+
+## 📈 Architecture Overview
+
+1. Code is pushed to GitHub.
+2. Jenkins builds the `.war` file using Maven.
+3. A Docker container is created using a custom Dockerfile.
+4. Jenkins automates the Docker build and container run.
+5. The app becomes accessible on specified container ports.
+
+---
+
+## 🔧 Setup & Configuration
+
+### 1. ⚙️ Docker Installation on Target Servers
+
+Install Docker on both **staging** and **QA servers**:
+
+```bash
+sudo apt update -y && sudo apt upgrade -y
+sudo apt install docker.io -y
+sudo systemctl start docker
+sudo systemctl enable docker
+```
+
+Confirm Docker version:
+
+```bash
+docker --version
+```
+
+Add current user to the Docker group for permission:
+
+```bash
+sudo usermod -aG docker ${USER}  # ${USER} resolves to 'azureuser'
+sudo init 6  # Reboot the machine
+```
+
+---
+
+### 2. 🧪 Test Pulling & Running Containers
+
+We tested Docker image pulls from DockerHub:
+
+```bash
+docker pull tomcat:latest
+docker pull nginx:latest
+docker pull httpd:latest
+docker images  # List downloaded images
+```
+
+Run a container exposing Tomcat:
+
+```bash
+docker run -d --name artford-con -p 8080:8080 tomcat:latest
+```
+
+Validate port availability:
+
+```bash
+sudo apt install net-tools -y
+sudo netstat -tnlp | grep :8080
+```
+
+![A screenshot of running containers with `docker ps -a`](assets/docker-running-containers.png)
+
+---
+
+### 3. 🔁 Manage Containers and Images
+
+Stop, remove containers, and clean up:
+
+```bash
+docker stop artford-con
+docker rm artford-con
+docker ps -a
+```
+
+Remove images:
+
+```bash
+docker rmi <image-id>
+```
+
+Run multiple containers on different ports:
+
+```bash
+docker run -d --name henry-con -p 8085:8080 tomcat:latest
+docker run -d --name bliss-con -p 8090:8080 tomcat:latest
+docker run -d --name dann-con -p 8095:8080 tomcat:latest
+```
+
+---
+
+### 4. 📦 Deploying Artifact Inside Containers
+
+Access the container shell:
+
+```bash
+docker exec -it henry-con /bin/bash
+```
+
+Inside the container:
+
+```bash
+cd /usr/local/tomcat/webapps  # Destination for .war file
+cp -r /usr/local/tomcat/webapps.dist/* /usr/local/tomcat/webapps
+```
+
+From host machine:
+
+```bash
+docker cp webapp.war henry-con:/usr/local/tomcat/webapps
+```
+
+Check browser:
+
+```url
+http://<server-ip>:8085/webapp/
+```
+
+---
+
+### 5. 🛠️ Dockerfile for Custom Image Creation
+
+We automated container provisioning by writing a Dockerfile:
+
+```dockerfile
+FROM tomcat:latest
+COPY ./webapp.war /usr/local/tomcat/webapps
+RUN cp -r /usr/local/tomcat/webapps.dist/* /usr/local/tomcat/webapps
+```
+
+Build and run custom image:
+
+```bash
+docker build -t bliss-im .
+docker run -d --name bliss-con -p 8090:8080 bliss-im
+```
+
+_💡 Suggestion:_ Add screenshot of Dockerfile code (e.g., `dockerfile-setup.png`).
+
+---
+
+### 6. 🔁 Jenkins Post-Build Docker Deployment
+
+Inside Jenkins Job:
+
+**Dashboard > Project Name > Configure > Post-build Actions > Exec Command**
+
+Add:
+
+```bash
+sudo docker build -t austin-im .
+sudo docker run -d --name austin-con -p 8088:8080 austin-im
+```
+
+Click **Build Now** to automate:
+
+- Docker image build from Dockerfile
+- Container launch on port 8088
+
+💡 Common Error: Jenkins may show unstable build due to namespace issues.
+
+Clean up and rebuild:
+
+```bash
+docker stop austin-con
+docker rm austin-con
+docker rmi austin-im
+sudo docker build -t austin-im .
+sudo docker run -d --name austin-con -p 8088:8080 austin-im
+```
+
+_💡 Suggestion:_ Add screenshot of Jenkins Exec Command section (e.g., `jenkins-postbuild-docker.png`).
+
+---
+
+## 🧠 Reflections & Learnings
+
+Containerizing the app took us one step closer to cloud-native DevOps. It was refreshing to see how quickly containers spin up and deploy artifacts without worrying about host environments.
+
+🔑 Key Takeaways:
+
+- Docker simplifies and standardizes deployments
+- Jenkins post-build automation saves time
+- Dockerfiles eliminate manual container configuration
+- Jenkins has namespace limits — for more complex flows, consider using Ansible or custom scripts
+
+---
+
+✅ **Week 3 Complete!**
+We’ve automated deployments inside Docker containers directly from Jenkins. Next up: pushing custom Docker images to DockerHub and pulling them into K8s clusters!
+
+---

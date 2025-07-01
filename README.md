@@ -724,11 +724,11 @@ $ docker push <dockerhub-username/repo-name:tagname>  # Push to DockerHub
 ## ⚙️ Ansible Setup on Staging Server
 
 ```bash
-$ sudo apt update && sudo apt upgrade -y         # Update OS
-$ sudo apt install ansible -y                    # Install Ansible
-$ sudo apt install python3-pip -y                # Python for pip
-$ pip install docker                             # Install Docker SDK for Ansible
-$ ansible --version                              # Confirm installation
+$ sudo apt update && sudo apt upgrade -y                              # Update OS
+$ sudo apt install ansible -y                                         # Install Ansible
+$ sudo apt install python3-pip -y                                     # Python for pip
+$ pip install --break-system-packages docker                          # Install Docker SDK for Ansible
+$ ansible --version                                                   # Confirm installation
 ```
 
 ---

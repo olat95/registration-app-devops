@@ -37,7 +37,8 @@ sudo vi sshd_config
 # Uncomment: PasswordAuthentication yes
 
 # Restart SSH daemon
-sudo systemctl restart sshd
+sudo systemctl restart sshd /
+systemctl daemon-reload
 ```
 
 ### 🔹 2. Update and Install Java 21

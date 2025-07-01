@@ -677,89 +677,65 @@ We’ve automated deployments inside Docker containers directly from Jenkins. Ne
 
 ---
 
-# Week 4: Automate Dockerized Deployment to Production with Ansible and Jenkins
+# Week 4: Ansible-Powered Production Deployment via Docker & Jenkins
 
-> **Project Goal:** Automate the deployment of a Java web application to production using **Ansible** from the **Staging Server**, and integrate it into the Jenkins pipeline.
+> **Project Goal:** Deploy containerized applications to multiple production servers using Ansible automation from a staging (QA) server. DockerHub is used as the image registry, with Ansible and Jenkins orchestrating the deployment pipeline.
 
 ---
 
 ## 🛠️ Tools & Technologies
 
-- **Docker** – Build and containerize the Java `.war` artifact
-- **Ansible** – Automate deployments using playbooks
-- **Jenkins** – Trigger Ansible playbooks post-build
-- **DockerHub** – Host application images
-- **Linux (Ubuntu, Debian, Amazon Linux, RedHat)** – VM infrastructure
+- **Ansible** – Automated deployments via SSH
+- **Docker** – Containerization engine
+- **Jenkins** – Continuous deployment trigger
+- **DockerHub** – Public container registry
+- **Amazon EC2 / Azure VMs** – Target production servers
 
 ---
 
 ## 📈 Architecture Overview
 
-1. Developers push to GitHub.
-2. Jenkins builds the `.war` and Docker image on **Staging Server**.
-3. Docker image is pushed to **DockerHub**.
-4. Ansible (from Staging) deploys image to **multiple production servers**.
-5. Jenkins triggers this automation.
-6. Load balancer (future setup) will front these production servers.
-
-![Architecture Diagram](assets/week4-ansible-arch.png)
+1. Developers push code to GitHub.
+2. Jenkins builds the application and creates a `.war` artifact.
+3. Docker image is built and container tested on staging.
+4. Image is pushed to DockerHub.
+5. Ansible playbook runs from QA server to production VMs over SSH.
+6. Production servers pull the image and run containers.
 
 ---
 
-## ⚙️ Docker Image Push to DockerHub
+## 🐳 Docker Image Push to DockerHub
 
-### 🔄 Prepare the Container
-
-```bash
-docker ps -a                     # View all containers
-docker start pelumhi-container  # Start our prepared container
-```
-
-### 🔐 Login to DockerHub
+Once satisfied with the container in QA (e.g. `austin-con`), we commit it into an image and push to DockerHub.
 
 ```bash
-docker login -u <dockerhub-username>
+$ docker ps -a                              # View containers
+$ docker start pelumhi-container           # Start container to commit
+$ docker login -u <dockerhub-username>     # Authenticate with DockerHub
+$ docker commit <container-id> <dockerhub-username/repo-name:tagname>  # Commit container as image
+$ docker images                            # Confirm image creation
+$ docker push <dockerhub-username/repo-name:tagname>  # Push to DockerHub
 ```
 
-### 📸 Commit Container to Image
-
-```bash
-docker commit pelumhi-container <dockerhub-username>/<repo-name>:<tag>
-```
-
-Example:
-
-```bash
-docker commit pelumhi-container olat95/july24:101124-2028
-```
-
-### 🛠️ Push to DockerHub
-
-```bash
-docker push olat95/july24:101124-2028
-```
-
-Go to DockerHub in the browser and verify the pushed image.
+> ![Add an image of the DockerHub repo UI after the push →](assets/dockerhub-pushed.png)
 
 ---
 
-## 🤖 Ansible Setup for Multi-Server Automation
-
-### 📌 Install Requirements on Staging/QA Server
+## ⚙️ Ansible Setup on Staging Server
 
 ```bash
-sudo apt update && sudo apt upgrade -y
-sudo apt install ansible -y
-ansible --version
-sudo apt install python3-pip -y
-pip install docker  # Or pip install --break-system-packages docker
+$ sudo apt update && sudo apt upgrade -y         # Update OS
+$ sudo apt install ansible -y                    # Install Ansible
+$ sudo apt install python3-pip -y                # Python for pip
+$ pip install docker                             # Install Docker SDK for Ansible
+$ ansible --version                              # Confirm installation
 ```
 
-### 📁 Create Host File (Inventory)
+---
 
-```bash
-vi hosts
-```
+## 📄 Ansible Inventory & Playbook
+
+### `hosts` (inventory):
 
 ```ini
 # List of Production Servers
@@ -767,11 +743,7 @@ azureuser@4.204.67.84
 azureuser@4.206.93.101
 ```
 
-### 📜 Create Ansible Playbook
-
-```bash
-vi pelumhi-app.yaml
-```
+### `pelumhi-app.yaml`:
 
 ```yaml
 ---
@@ -799,102 +771,66 @@ vi pelumhi-app.yaml
       command: docker rmi pelumhi-image
       ignore_errors: True
 
-    - name: create custom image from dockerfile
+    - name: create customimage from dockerfile
       command: docker build -t pelumhi-image .
 
-    - name: run container with exposed port
+    - name: create and run container
       command: docker run -d --name pelumhi-container -p 8081:8080 pelumhi-image
 ```
 
-📌 `ignore_errors: true` allows the playbook to continue even if the container/image does not exist yet.
+> ![Ansible playbook execution result →](assets/ansible-success.png)
 
----
-
-## 📡 Establishing SSH Between QA (Staging) and Production Servers
-
-1. Create custom AMI from Staging VM.
-2. Launch Ubuntu, RedHat, Debian, Amazon Linux VMs using the AMI.
-3. Ensure `Java` and `Docker` are installed.
-4. From QA Server:
+Run the playbook:
 
 ```bash
-ssh <user>@<production-ip>  # Repeat for each
+$ ansible-playbook -i hosts pelumhi-app.yaml
 ```
-
-Update `hosts` file with valid production IPs and user.
 
 ---
 
-## 🚀 Run Ansible Deployment
+## 🔁 Jenkins Integration with Ansible
 
-From the **Staging Server**:
+### Jenkins → Post-Build Exec Command:
 
 ```bash
 ansible-playbook -i hosts pelumhi-app.yaml
 ```
 
-Optional (limit to specific server):
+> Navigate to Jenkins Job → Configure → Add as Exec Command.
 
-```bash
-ansible-playbook -i hosts pelumhi-app.yaml --limit azureuser@4.204.67.84
-```
+> ![Jenkins exec command config screen →](assets/jenkins-ansible-cmd.png)
 
 ---
 
-## 🔁 Automate from Jenkins Post-Build
+## 🔄 Jenkins Build Trigger & Webhook Setup
 
-Navigate to:
+We set up a Jenkins build trigger so every time a developer pushes code to GitHub, Jenkins pulls and triggers the full deployment.
 
-```
-Jenkins > Dashboard > Project > Configure > Post-build Actions > Exec Command
-```
+1. Navigate to Jenkins Job → **Configure > Build Triggers**
+2. Check "GitHub hook trigger for GITScm polling"
+3. Ensure GitHub webhook is added to trigger Jenkins build
 
-Paste:
-
-```bash
-ansible-playbook -i hosts pelumhi-app.yaml
-```
-
-Click `Apply` and `Save`, then trigger the build.
+> 💡 Screenshot suggestion: Jenkins build trigger config → `assets/jenkins-webhook.png`
 
 ---
 
-## ⚙️ Automating Docker Image Creation & Run in Jenkins
+## 🧠 Reflections & Learnings
 
-Still under Jenkins `Exec Command`, append:
+This week, I achieved automated multi-server deployment using Ansible.
 
-```bash
-sudo docker build -t austin-im .
-sudo docker run -d --name austin-con -p 8088:8080 austin-im
-```
+🔑 Key Takeaways:
 
-✅ **This enables automatic container creation post-build.**
-
-If rebuild fails:
-
-```bash
-docker stop austin-con
-docker rm austin-con
-docker rmi austin-im
-sudo docker build -t austin-im .
-sudo docker run -d --name austin-con -p 8088:8080 austin-im
-```
-
----
-
-## 🌐 Planning Ahead: Single Domain Access (Bonus)
-
-To allow multiple production servers to serve under one domain:
-
-1. Register all production servers into a **Target Group**.
-2. Create a **Load Balancer** (Azure/AWS/GCP).
-3. Point the load balancer to a single domain.
-
-This ensures horizontal scaling and high availability.
+- Docker image pushes decouple deployment from infrastructure
+- Ansible playbooks scale deployment across any number of VMs
+- Jenkins can act as the bridge between build and deployment with just one exec command
+- Manual provisioning is error-prone — automation boosts repeatability and confidence
 
 ---
 
 ✅ **Week 4 Complete!**
-We now build and push container images from Jenkins, and deploy them to multiple production servers using Ansible. We've laid the foundation for scalable, container-based delivery.
 
-Next week: Hosting on DockerHub + CI/CD for Kubernetes!
+- DockerHub connected
+- Ansible deployed across production
+- Jenkins now fully controls deployment via build triggers
+
+> ![Final deployed app on production1 URL →](assets/prod1.png) > ![Final deployed app on production2 URL →](assets/prod2.png)

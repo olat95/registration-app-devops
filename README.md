@@ -727,7 +727,7 @@ $ docker push <dockerhub-username/repo-name:tagname>  # Push to DockerHub
 $ sudo apt update && sudo apt upgrade -y                              # Update OS
 $ sudo apt install ansible -y                                         # Install Ansible
 $ sudo apt install python3-pip -y                                     # Python for pip
-$ pip install --break-system-packages docker                          # Install Docker SDK for Ansible
+$ pip install docker or pip install --break-system-packages docker                          # Install Docker SDK for Ansible
 $ ansible --version                                                   # Confirm installation
 ```
 
@@ -785,6 +785,17 @@ Run the playbook:
 ```bash
 $ ansible-playbook -i hosts pelumhi-app.yaml
 ```
+
+## ⚠️ Blocker Experienced
+
+When I first ran the Ansible playbook, I encountered the following errors:
+
+- `docker: command not found`
+- `permission denied: cannot access docker daemon`
+
+This happened because I had created new production servers **without installing Docker** or **adding `azureuser` to the Docker group**.
+
+✅ **Lesson learned:** The tutorial assumed reusing the staging server’s AMI (with Docker pre-installed). In my case, skipping this step led to deployment failure. After installing Docker and reconfiguring permissions, the issue was resolved.
 
 ---
 

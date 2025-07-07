@@ -9,6 +9,7 @@
 
 <div class="wrapper">
   <h1 class="main-title">🚀 Register for DevOps Learning</h1>
+  < h1 class="main-title">🚀 DevOps Instructor - Obafemi</h1> 
   <h2 class="sub-title">Virtual TechBox YouTube Channel — 2025</h2>
 
   <form id="registerForm">

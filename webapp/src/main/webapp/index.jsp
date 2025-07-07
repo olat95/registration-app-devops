@@ -8,8 +8,8 @@
 <body>
 
 <div class="wrapper">
-  <h1 class="main-title">🚀 Register for DevOps Learning!!!</h1>
-  <h1 class="main-title">🚀 DevOps Instructor - Moyo Obafemi</h1> 
+  <h1 class="main-title">Register for DevOps Learning!!!</h1>
+  <h1 class="main-title">DevOps Instructor - Moyo Obafemi</h1> 
   <h2 class="sub-title">Virtual TechBox YouTube Channel — 2025</h2>
 
   <form id="registerForm">
@@ -33,7 +33,7 @@
         <input type="password" placeholder="Repeat Password" name="psw-repeat" id="psw-repeat" required>
 
         <p class="terms">By creating an account you agree to our <a href="#">Terms & Privacy</a>.</p>
-        <button type="submit" class="registerbtn">🚀 Register Now</button>
+        <button type="submit" class="registerbtn">Register Now</button>
       </div>
     </div>
   </form>
@@ -43,7 +43,7 @@
   </div>
 
   <footer>
-    <h3>✨ Thank You, Happy Learning ✨</h3>
+    <h3>Thank You, Happy Learning</h3>
     <h4>See You Again — Pelumi</h4>
   </footer>
 </div>
